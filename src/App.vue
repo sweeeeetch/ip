@@ -1,5 +1,5 @@
 <template>
-  <div class="h-[100dvh] w-[100dvw] overflow-hidden">
+  <div class="h-[100dvh] w-[100dvw]">
     <transition name="loader">
       <AppLoader v-if="isLoading" />
     </transition>
