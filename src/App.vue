@@ -376,36 +376,8 @@ const changeScreen = (direction: "next" | "prev") => {
   router.push({ name: routeNames[nextIndex] });
 };
 
-let touchStartX = 0;
-
-const handleTouchStart = (event: TouchEvent) => {
-  touchStartX = event.touches?.[0]?.clientX ?? 0;
-};
-
-const handleTouchEnd = (event: TouchEvent) => {
-  const endX = event.changedTouches?.[0]?.clientX ?? 0;
-  const diff = touchStartX - endX;
-  if (Math.abs(diff) <= 50) return;
-  changeScreen(diff > 0 ? "next" : "prev");
-};
-
-const handleKeydown = (event: KeyboardEvent) => {
-  if (event.key === "ArrowLeft") changeScreen("prev");
-  if (event.key === "ArrowRight") changeScreen("next");
-};
-
 onMounted(() => {
-  document.addEventListener("touchstart", handleTouchStart);
-  document.addEventListener("touchend", handleTouchEnd);
-  document.addEventListener("keydown", handleKeydown);
-
   isLoading.value = false;
-});
-
-onUnmounted(() => {
-  document.removeEventListener("touchstart", handleTouchStart);
-  document.removeEventListener("touchend", handleTouchEnd);
-  document.removeEventListener("keydown", handleKeydown);
 });
 </script>
 
