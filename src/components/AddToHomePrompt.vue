@@ -6,7 +6,7 @@
         class="a2hp-layer">
         <div
           v-if="isVisible"
-          class="fixed left-0 top-0 z-[99] h-full w-full bg-black opacity-60"></div>
+          class="fixed left-0 top-0 z-[99] h-full w-full bg-black opacity-60 backdrop-blur-sm"></div>
         <!-- <div
           class="a2hp-backdrop"
           aria-hidden="true"></div> -->
