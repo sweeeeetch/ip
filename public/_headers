@@ -1,0 +1,13 @@
+/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+
+# Long cache for hashed assets (Vite outputs hashed filenames)
+# Let Workbox also manage them, this just improves first load
+/*.js
+  Cache-Control: public, max-age=31536000, immutable
+/*.css
+  Cache-Control: public, max-age=31536000, immutable
+/*.png
+  Cache-Control: public, max-age=31536000, immutable
+/*.svg
+  Cache-Control: public, max-age=31536000, immutable
