@@ -1,11 +1,13 @@
 <template>
-  <div class="h-[100dvh] w-[100dvw]">
+  <div
+    class="h-[100dvh] w-[100dvw]"
+    :class="{ 'overflow-hidden': overflowHidden }">
     <transition name="loader">
       <AppLoader v-if="isLoading" />
     </transition>
 
     <template v-if="!isLoading">
-      <AddToHomePrompt />
+      <AddToHomePrompt @show="overflowHidden = true" />
       <div
         class="min-h-screen bg-neutral-50"
         style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
@@ -363,6 +365,8 @@ const router = useRouter();
 const route = useRoute();
 
 const isLoading = ref(true);
+const overflowHidden = ref(true);
+
 const routeNames = screens.map(screen => screen.routeName);
 const currentRouteName = computed<RouteName>(() => {
   const name = route.name as RouteName | undefined;

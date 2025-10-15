@@ -5,11 +5,8 @@
         v-if="isVisible"
         class="a2hp-layer">
         <div
-          v-if="isVisible"
-          class="fixed left-0 top-0 z-[99] h-full w-full bg-black opacity-60 backdrop-blur-sm"></div>
-        <!-- <div
           class="a2hp-backdrop"
-          aria-hidden="true"></div> -->
+          aria-hidden="true"></div>
         <div class="a2hp-shell">
           <div
             v-if="showIosArrow"
@@ -161,6 +158,8 @@ type BeforeInstallPromptEvent = Event & {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 };
 
+const emit = defineEmits(["show"]);
+
 const DISMISS_KEY = "a2hp-dismissed";
 const SUPPRESS_MS = 1000 * 60 * 60 * 24; // 24 часа
 const BODY_LOCK_CLASS = "a2hp-body-lock";
@@ -278,6 +277,7 @@ const scheduleShow = () => {
 
   if (!shouldSuppress() && !isStandalone()) {
     isVisible.value = true;
+    emit("show");
   }
   // hideTimeout.value = window.setTimeout(() => {
   // }, 1200);
