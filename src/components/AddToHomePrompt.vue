@@ -341,6 +341,8 @@ onUnmounted(() => {
   padding: 20px 16px;
   z-index: 60;
   box-sizing: border-box;
+  width: 100dvw;
+  height: 100dvh;
 }
 
 @media (min-width: 640px) {
@@ -521,10 +523,8 @@ onUnmounted(() => {
 </style>
 
 <style>
-:global(body.a2hp-body-lock) {
+:global(body) {
   overflow: hidden;
   touch-action: none;
 }
 </style>
-
-git init git add . git commit -m "first commit" git branch -M main git remote add origin git@github.com:sweeeeetch/ip.git git push -u origin main
