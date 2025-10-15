@@ -1,148 +1,153 @@
 <template>
-  <!-- <Teleport to="body"> -->
-  <Transition name="a2hp-fade">
-    <div
-      v-if="isVisible"
-      class="a2hp-backdrop pointer-events-none">
+  <Teleport to="body">
+    <Transition name="a2hp-fade">
       <div
-        v-if="showIosArrow"
-        class="a2hp-arrow a2hp-arrow-ios"
-        aria-hidden="true">
-        <svg
-          viewBox="0 0 32 72"
-          xmlns="http://www.w3.org/2000/svg">
-          <path
-            d="M16 0c-1.2 0-2.2.9-2.3 2.1L12.3 48 6 40.7a2.3 2.3 0 0 0-3.4 3l10.5 14a2.3 2.3 0 0 0 3.6 0l10.5-14a2.3 2.3 0 1 0-3.4-3L19.7 48l-1.4-45.9C18.2.9 17.2 0 16 0Z"
-            fill="#f9fafb" />
-        </svg>
-        <div class="a2hp-arrow-label">Нажмите «Поделиться»</div>
-      </div>
-      <div
-        v-if="showAndroidArrow"
-        class="a2hp-arrow a2hp-arrow-android"
-        aria-hidden="true">
-        <svg
-          viewBox="0 0 64 64"
-          xmlns="http://www.w3.org/2000/svg">
-          <path
-            d="m50.6 11.4-3-3a2.5 2.5 0 0 0-3.5 0L29 23.4V12a2.5 2.5 0 0 0-5 0v20a2.5 2.5 0 0 0 2.5 2.5h20a2.5 2.5 0 0 0 0-5H36.6L50.6 14.9a2.5 2.5 0 0 0 0-3.5Z"
-            fill="#f9fafb" />
-          <path
-            d="M50 30a2 2 0 0 1 4 0v21.5A12.5 12.5 0 0 1 41.5 64H12.4A12.4 12.4 0 0 1 0 51.6V22.5A12.5 12.5 0 0 1 12.5 10h21.6a2 2 0 0 1 0 4H12.5A8.5 8.5 0 0 0 4 22.5v29a8.5 8.5 0 0 0 8.5 8.5h29a8.5 8.5 0 0 0 8.5-8.5Z"
-            fill="#f9fafb"
-            opacity=".6" />
-        </svg>
-        <div class="a2hp-arrow-label">Меню «⋮»</div>
-      </div>
-      <div
-        class="a2hp-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="a2hp-title">
-        <header class="a2hp-header">
-          <h2
-            id="a2hp-title"
-            class="a2hp-title">
-            Добавьте приложение на экран смартфона
-          </h2>
-          <p class="a2hp-subtitle">Так вы откроете его быстрее и в полноэкранном режиме.</p>
-        </header>
+        v-if="isVisible"
+        class="a2hp-layer">
+        <div
+          class="a2hp-backdrop"
+          aria-hidden="true"></div>
+        <div class="a2hp-shell">
+          <div
+            v-if="showIosArrow"
+            class="a2hp-arrow a2hp-arrow-ios"
+            aria-hidden="true">
+            <svg
+              viewBox="0 0 32 72"
+              xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M16 0c-1.2 0-2.2.9-2.3 2.1L12.3 48 6 40.7a2.3 2.3 0 0 0-3.4 3l10.5 14a2.3 2.3 0 0 0 3.6 0l10.5-14a2.3 2.3 0 1 0-3.4-3L19.7 48l-1.4-45.9C18.2.9 17.2 0 16 0Z"
+                fill="#f9fafb" />
+            </svg>
+            <div class="a2hp-arrow-label">Нажмите «Поделиться»</div>
+          </div>
+          <div
+            v-if="showAndroidArrow"
+            class="a2hp-arrow a2hp-arrow-android"
+            aria-hidden="true">
+            <svg
+              viewBox="0 0 64 64"
+              xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="m50.6 11.4-3-3a2.5 2.5 0 0 0-3.5 0L29 23.4V12a2.5 2.5 0 0 0-5 0v20a2.5 2.5 0 0 0 2.5 2.5h20a2.5 2.5 0 0 0 0-5H36.6L50.6 14.9a2.5 2.5 0 0 0 0-3.5Z"
+                fill="#f9fafb" />
+              <path
+                d="M50 30a2 2 0 0 1 4 0v21.5A12.5 12.5 0 0 1 41.5 64H12.4A12.4 12.4 0 0 1 0 51.6V22.5A12.5 12.5 0 0 1 12.5 10h21.6a2 2 0 0 1 0 4H12.5A8.5 8.5 0 0 0 4 22.5v29a8.5 8.5 0 0 0 8.5 8.5h29a8.5 8.5 0 0 0 8.5-8.5Z"
+                fill="#f9fafb"
+                opacity=".6" />
+            </svg>
+            <div class="a2hp-arrow-label">Меню «⋮»</div>
+          </div>
+          <div
+            class="a2hp-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="a2hp-title">
+            <header class="a2hp-header">
+              <h2
+                id="a2hp-title"
+                class="a2hp-title">
+                Добавьте приложение на экран смартфона
+              </h2>
+              <p class="a2hp-subtitle">Так вы откроете его быстрее и в полноэкранном режиме.</p>
+            </header>
 
-        <section class="a2hp-content">
-          <p class="a2hp-intro">Последуйте шагам ниже:</p>
-          <ol class="a2hp-steps">
-            <li
-              v-for="step in steps"
-              :key="step.text"
-              class="a2hp-step">
-              <span
-                v-if="step.icon === 'ios-share'"
-                class="a2hp-step-icon"
-                aria-hidden="true">
-                <svg
-                  viewBox="0 0 48 48"
-                  xmlns="http://www.w3.org/2000/svg">
-                  <path
-                    d="M34 16h-6v12a4 4 0 1 1-8 0V16h-6c-2 0-3-2.4-1.6-4l10-11.5a2.1 2.1 0 0 1 3.2 0L35.6 12c1.4 1.6.4 4-1.6 4Z"
-                    fill="#111827" />
-                  <path
-                    d="M6 46a2 2 0 0 1-2-2V27a2 2 0 0 1 4 0v15h32V27a2 2 0 0 1 4 0v17a2 2 0 0 1-2 2Z"
-                    fill="#111827"
-                    opacity=".6" />
-                </svg>
-              </span>
-              <span
-                v-else-if="step.icon === 'ios-add'"
-                class="a2hp-step-icon"
-                aria-hidden="true">
-                <svg
-                  viewBox="0 0 48 48"
-                  xmlns="http://www.w3.org/2000/svg">
-                  <path
-                    d="M24 8a2 2 0 0 1 2 2v12h12a2 2 0 1 1 0 4H26v12a2 2 0 1 1-4 0V26H10a2 2 0 1 1 0-4h12V10a2 2 0 0 1 2-2Z"
-                    fill="#111827" />
-                </svg>
-              </span>
-              <span
-                v-else-if="step.icon === 'android-menu'"
-                class="a2hp-step-icon"
-                aria-hidden="true">
-                <svg
-                  viewBox="0 0 48 48"
-                  xmlns="http://www.w3.org/2000/svg">
-                  <circle
-                    cx="24"
-                    cy="10"
-                    r="4"
-                    fill="#111827" />
-                  <circle
-                    cx="24"
-                    cy="24"
-                    r="4"
-                    fill="#111827" />
-                  <circle
-                    cx="24"
-                    cy="38"
-                    r="4"
-                    fill="#111827" />
-                </svg>
-              </span>
-              <span
-                v-else-if="step.icon === 'android-add'"
-                class="a2hp-step-icon"
-                aria-hidden="true">
-                <svg
-                  viewBox="0 0 48 48"
-                  xmlns="http://www.w3.org/2000/svg">
-                  <path
-                    d="M24 12a2 2 0 0 1 2 2v8h8a2 2 0 1 1 0 4h-8v8a2 2 0 1 1-4 0v-8h-8a2 2 0 1 1 0-4h8v-8a2 2 0 0 1 2-2Z"
-                    fill="#111827" />
-                </svg>
-              </span>
-              <span class="a2hp-step-text">{{ step.text }}</span>
-            </li>
-          </ol>
-          <p
-            v-if="closingNote"
-            class="a2hp-note">
-            {{ closingNote }}
-          </p>
-        </section>
+            <section class="a2hp-content">
+              <p class="a2hp-intro">Последуйте шагам ниже:</p>
+              <ol class="a2hp-steps">
+                <li
+                  v-for="step in steps"
+                  :key="step.text"
+                  class="a2hp-step">
+                  <span
+                    v-if="step.icon === 'ios-share'"
+                    class="a2hp-step-icon"
+                    aria-hidden="true">
+                    <svg
+                      viewBox="0 0 48 48"
+                      xmlns="http://www.w3.org/2000/svg">
+                      <path
+                        d="M34 16h-6v12a4 4 0 1 1-8 0V16h-6c-2 0-3-2.4-1.6-4l10-11.5a2.1 2.1 0 0 1 3.2 0L35.6 12c1.4 1.6.4 4-1.6 4Z"
+                        fill="#111827" />
+                      <path
+                        d="M6 46a2 2 0 0 1-2-2V27a2 2 0 0 1 4 0v15h32V27a2 2 0 0 1 4 0v17a2 2 0 0 1-2 2Z"
+                        fill="#111827"
+                        opacity=".6" />
+                    </svg>
+                  </span>
+                  <span
+                    v-else-if="step.icon === 'ios-add'"
+                    class="a2hp-step-icon"
+                    aria-hidden="true">
+                    <svg
+                      viewBox="0 0 48 48"
+                      xmlns="http://www.w3.org/2000/svg">
+                      <path
+                        d="M24 8a2 2 0 0 1 2 2v12h12a2 2 0 1 1 0 4H26v12a2 2 0 1 1-4 0V26H10a2 2 0 1 1 0-4h12V10a2 2 0 0 1 2-2Z"
+                        fill="#111827" />
+                    </svg>
+                  </span>
+                  <span
+                    v-else-if="step.icon === 'android-menu'"
+                    class="a2hp-step-icon"
+                    aria-hidden="true">
+                    <svg
+                      viewBox="0 0 48 48"
+                      xmlns="http://www.w3.org/2000/svg">
+                      <circle
+                        cx="24"
+                        cy="10"
+                        r="4"
+                        fill="#111827" />
+                      <circle
+                        cx="24"
+                        cy="24"
+                        r="4"
+                        fill="#111827" />
+                      <circle
+                        cx="24"
+                        cy="38"
+                        r="4"
+                        fill="#111827" />
+                    </svg>
+                  </span>
+                  <span
+                    v-else-if="step.icon === 'android-add'"
+                    class="a2hp-step-icon"
+                    aria-hidden="true">
+                    <svg
+                      viewBox="0 0 48 48"
+                      xmlns="http://www.w3.org/2000/svg">
+                      <path
+                        d="M24 12a2 2 0 0 1 2 2v8h8a2 2 0 1 1 0 4h-8v8a2 2 0 1 1-4 0v-8h-8a2 2 0 1 1 0-4h8v-8a2 2 0 0 1 2-2Z"
+                        fill="#111827" />
+                    </svg>
+                  </span>
+                  <span class="a2hp-step-text">{{ step.text }}</span>
+                </li>
+              </ol>
+              <p
+                v-if="closingNote"
+                class="a2hp-note">
+                {{ closingNote }}
+              </p>
+            </section>
 
-        <footer
-          v-if="showPrimaryButton"
-          class="a2hp-actions">
-          <button
-            class="a2hp-primary"
-            type="button"
-            @click="handlePrimary">
-            {{ primaryLabel }}
-          </button>
-        </footer>
+            <footer
+              v-if="showPrimaryButton"
+              class="a2hp-actions">
+              <button
+                class="a2hp-primary"
+                type="button"
+                @click="handlePrimary">
+                {{ primaryLabel }}
+              </button>
+            </footer>
+          </div>
+        </div>
       </div>
-    </div>
-  </Transition>
-  <!-- </Teleport> -->
+    </Transition>
+  </Teleport>
 </template>
 
 <script setup lang="ts">
@@ -156,6 +161,37 @@ type BeforeInstallPromptEvent = Event & {
 const DISMISS_KEY = "a2hp-dismissed";
 const SUPPRESS_MS = 1000 * 60 * 60 * 24; // 24 часа
 const BODY_LOCK_CLASS = "a2hp-body-lock";
+const body = typeof document !== "undefined" ? document.body : null;
+// Share scroll lock bookkeeping with other modals via body.dataset.
+const LOCK_COUNT_KEY = "modalLockCount";
+const ORIGINAL_OVERFLOW_KEY = "modalOriginalOverflow";
+
+const lockScroll = () => {
+  if (!body) return;
+  const current = Number(body.dataset[LOCK_COUNT_KEY] ?? "0");
+  if (current === 0) {
+    body.dataset[ORIGINAL_OVERFLOW_KEY] = body.style.overflow || "";
+    body.style.overflow = "hidden";
+  }
+  body.dataset[LOCK_COUNT_KEY] = String(current + 1);
+};
+
+const unlockScroll = () => {
+  if (!body || !body.dataset[LOCK_COUNT_KEY]) return;
+  const current = Number(body.dataset[LOCK_COUNT_KEY] ?? "0");
+  if (current <= 1) {
+    const original = body.dataset[ORIGINAL_OVERFLOW_KEY] ?? "";
+    if (original) {
+      body.style.overflow = original;
+    } else {
+      body.style.removeProperty("overflow");
+    }
+    delete body.dataset[LOCK_COUNT_KEY];
+    delete body.dataset[ORIGINAL_OVERFLOW_KEY];
+  } else {
+    body.dataset[LOCK_COUNT_KEY] = String(current - 1);
+  }
+};
 
 const isVisible = ref(false);
 const deferredPrompt: Ref<BeforeInstallPromptEvent | null> = ref(null);
@@ -281,13 +317,13 @@ const handleAppInstalled = () => {
 watch(
   isVisible,
   value => {
-    if (typeof document === "undefined") return;
-    const body = document.body;
     if (!body) return;
     if (value) {
       body.classList.add(BODY_LOCK_CLASS);
+      lockScroll();
     } else {
       body.classList.remove(BODY_LOCK_CLASS);
+      unlockScroll();
     }
   },
   { immediate: true }
@@ -313,9 +349,10 @@ onUnmounted(() => {
     window.clearTimeout(hideTimeout.value);
     hideTimeout.value = null;
   }
-  if (typeof document !== "undefined") {
-    document.body.classList.remove(BODY_LOCK_CLASS);
+  if (body) {
+    body.classList.remove(BODY_LOCK_CLASS);
   }
+  unlockScroll();
 });
 </script>
 
@@ -330,23 +367,36 @@ onUnmounted(() => {
   opacity: 0;
 }
 
-.a2hp-backdrop {
+.a2hp-layer {
   position: fixed;
+  inset: 0;
+  width: 100dvw;
+  height: 100dvh;
+  z-index: 99999;
+  pointer-events: auto;
+}
+
+.a2hp-backdrop {
+  position: absolute;
   inset: 0;
   background: rgba(15, 23, 32, 0.55);
   backdrop-filter: blur(6px);
+}
+
+.a2hp-shell {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: flex-end;
   justify-content: center;
   padding: 20px 16px;
-  z-index: 60;
   box-sizing: border-box;
-  width: 100dvw;
-  height: 100dvh;
 }
 
 @media (min-width: 640px) {
-  .a2hp-backdrop {
+  .a2hp-shell {
     align-items: center;
     padding: 24px;
   }
@@ -523,7 +573,7 @@ onUnmounted(() => {
 </style>
 
 <style>
-:global(body) {
+:global(body.a2hp-body-lock) {
   overflow: hidden;
   touch-action: none;
 }
