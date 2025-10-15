@@ -3,9 +3,11 @@
     <Transition name="fade">
       <div
         v-if="modelValue"
-        class="fixed inset-0 z-40 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
-        @click.self="close">
-        <div class="relative w-full max-w-xl rounded-3xl bg-white shadow-2xl">
+        class="fixed inset-0 z-[99999] flex items-center justify-center px-4">
+        <div
+          class="absolute inset-0 bg-black/40 backdrop-blur-sm"
+          @click="close"></div>
+        <div class="relative z-10 w-full max-w-xl rounded-3xl bg-white shadow-2xl">
           <header class="flex items-center justify-between border-b border-neutral-200 px-6 py-4">
             <h3 class="text-lg font-medium text-neutral-900">{{ title }}</h3>
             <button
@@ -30,6 +32,7 @@
 
 <script setup lang="ts">
 import { X } from "lucide-vue-next";
+import { onBeforeUnmount, watch } from "vue";
 
 const props = withDefaults(
   defineProps<{
@@ -48,6 +51,54 @@ const emit = defineEmits<{
 const close = () => {
   emit("update:modelValue", false);
 };
+
+const body = typeof document !== "undefined" ? document.body : null;
+// Store bookkeeping values on body.dataset so multiple modals play nicely together.
+const LOCK_COUNT_KEY = "modalLockCount";
+const ORIGINAL_OVERFLOW_KEY = "modalOriginalOverflow";
+
+const lockScroll = () => {
+  if (!body) return;
+  const current = Number(body.dataset[LOCK_COUNT_KEY] ?? "0");
+  if (current === 0) {
+    body.dataset[ORIGINAL_OVERFLOW_KEY] = body.style.overflow || "";
+    body.style.overflow = "hidden";
+  }
+  body.dataset[LOCK_COUNT_KEY] = String(current + 1);
+};
+
+const unlockScroll = () => {
+  if (!body || !body.dataset[LOCK_COUNT_KEY]) return;
+  const current = Number(body.dataset[LOCK_COUNT_KEY] ?? "0");
+  if (current <= 1) {
+    const original = body.dataset[ORIGINAL_OVERFLOW_KEY] ?? "";
+    if (original) {
+      body.style.overflow = original;
+    } else {
+      body.style.removeProperty("overflow");
+    }
+    delete body.dataset[LOCK_COUNT_KEY];
+    delete body.dataset[ORIGINAL_OVERFLOW_KEY];
+  } else {
+    body.dataset[LOCK_COUNT_KEY] = String(current - 1);
+  }
+};
+
+watch(
+  () => props.modelValue,
+  (isOpen) => {
+    if (isOpen) {
+      lockScroll();
+    } else {
+      unlockScroll();
+    }
+  },
+  { immediate: true }
+);
+
+onBeforeUnmount(() => {
+  unlockScroll();
+});
 </script>
 
 <style scoped>

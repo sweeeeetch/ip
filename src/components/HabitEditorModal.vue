@@ -52,7 +52,7 @@
 
       <div class="space-y-2">
         <label class="block text-sm font-medium text-neutral-700">Цвет иконки</label>
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
           <button
             v-for="option in colorOptions"
             :key="option.value"

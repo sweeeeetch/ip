@@ -8,8 +8,8 @@
     </button>
 
     <BaseModal
-      v-model="showHelp"
-      title="О системе i.p">
+      :isOpen="showHelp"
+      @close="showHelp = false">
       <div class="mb-6">
         <h3 class="text-lg font-medium text-neutral-800 mb-3 flex items-center">
           <span class="text-xl mr-2">🔒</span>
@@ -23,13 +23,13 @@
         </div>
       </div>
 
-      <template #footer>
+      <div class="flex justify-end">
         <button
           @click="showHelp = false"
           class="bg-neutral-900 text-white px-6 py-2 rounded-xl hover:bg-neutral-800 transition-colors font-medium text-sm">
           Понятно!
         </button>
-      </template>
+      </div>
     </BaseModal>
   </div>
 </template>
