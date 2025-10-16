@@ -111,6 +111,12 @@ export interface Reward {
   claimedAt: number | null;
 }
 
+export interface RewardPayload {
+  name: string;
+  cost: number;
+  resetDays: number;
+}
+
 export interface GratitudeEntry {
   id: number;
   text: string;

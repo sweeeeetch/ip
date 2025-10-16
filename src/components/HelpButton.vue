@@ -8,8 +8,8 @@
     </button>
 
     <BaseModal
-      :isOpen="showHelp"
-      @close="showHelp = false">
+      title="Информация о приватности и использовании"
+      v-model="showHelp">
       <div class="mb-6">
         <h3 class="text-lg font-medium text-neutral-800 mb-3 flex items-center">
           <span class="text-xl mr-2">🔒</span>

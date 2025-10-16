@@ -14,14 +14,15 @@
     :active-goals-count="activeGoalsCount"
     :time-until-reset="timeUntilReset"
     :top-streaks="topStreaks"
-    @export-data="exportData" />
+    @export-data="exportData"
+    @import-data="importData" />
 </template>
 
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
 
 import ScreenStats from "@/components/ScreenStats.vue";
-import { useAppStore } from "@/stores/appStore";
+import { useAppStore, type ImportResult } from "@/stores/appStore";
 
 const store = useAppStore();
 const {
@@ -53,5 +54,15 @@ const exportData = () => {
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
+};
+
+const importData = (snapshot: unknown, respond: (result: ImportResult) => void) => {
+  try {
+    const result = store.restoreFromSnapshot(snapshot);
+    respond(result);
+  } catch (error) {
+    console.error("Failed to import snapshot", error);
+    respond({ success: false, message: "Произошла непредвиденная ошибка при импорте." });
+  }
 };
 </script>

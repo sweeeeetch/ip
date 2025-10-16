@@ -48,7 +48,15 @@
           v-for="item in gratitude.slice(-5).reverse()"
           :key="item.id"
           class="bg-pink-50 rounded-lg p-3">
-          <p class="text-sm text-neutral-700">{{ item.text }}</p>
+          <div class="flex items-start justify-between gap-3">
+            <p class="text-sm text-neutral-700">{{ item.text }}</p>
+            <button
+              type="button"
+              class="rounded-full p-1.5 text-pink-400 transition hover:bg-pink-100/70 hover:text-pink-500"
+              @click="deleteGratitude(item.id)">
+              <Trash2 class="h-4 w-4" />
+            </button>
+          </div>
           <p class="text-xs text-neutral-500 mt-1">{{ item.date }}</p>
         </div>
       </div>
@@ -98,7 +106,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import { Smile, Heart, Plus, DollarSign } from "lucide-vue-next";
+import { Smile, Heart, Plus, DollarSign, Trash2 } from "lucide-vue-next";
 
 import type { FinancialBonus, GratitudeEntry } from "@/types/app";
 
@@ -112,6 +120,7 @@ const emit = defineEmits<{
   updateMood: [mood: number];
   addGratitude: [gratitude: GratitudeEntry];
   addFinancialBonus: [bonusId: number];
+  deleteGratitude: [gratitudeId: number];
 }>();
 
 const newGratitude = ref("");
@@ -154,6 +163,10 @@ const addFinancialBonus = (bonusId: number) => {
       toastTimer = undefined;
     }, 1800);
   }
+};
+
+const deleteGratitude = (entryId: number) => {
+  emit("deleteGratitude", entryId);
 };
 </script>
 

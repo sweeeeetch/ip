@@ -3,12 +3,24 @@
     <div class="bg-white rounded-3xl shadow-sm p-6 md:p-8 border border-neutral-100">
       <div class="flex gap-4 flex-row sm:items-center sm:justify-between mb-6 md:mb-8">
         <h3 class="text-xl sm:text-2xl font-light text-neutral-900">Статистика и достижения</h3>
-        <button
-          @click="exportData"
-          class="flex items-center space-x-0 sm:space-x-2 justify-between bg-neutral-100 text-neutral-700 px-4 py-2 text-sm sm:text-base rounded-xl hover:bg-neutral-200 transition-colors">
-          <Download class="w-4 h-4" />
-          <span class="hidden sm:block">Экспорт</span>
-        </button>
+        <div class="flex flex-col items-end gap-2 sm:gap-3 text-right">
+          <div class="flex items-center gap-2 sm:gap-3">
+            <button
+              type="button"
+              class="flex items-center space-x-0 sm:space-x-2 justify-between bg-neutral-100 text-neutral-700 px-4 py-2 text-sm sm:text-base rounded-xl hover:bg-neutral-200 transition-colors"
+              @click="handleImportClick">
+              <Download class="w-4 h-4" />
+              <span class="hidden sm:block">Импорт</span>
+            </button>
+            <button
+              type="button"
+              class="flex items-center space-x-0 sm:space-x-2 justify-between bg-neutral-100 text-neutral-700 px-4 py-2 text-sm sm:text-base rounded-xl hover:bg-neutral-200 transition-colors"
+              @click="exportData">
+              <Upload class="w-4 h-4" />
+              <span class="hidden sm:block">Экспорт</span>
+            </button>
+          </div>
+        </div>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
@@ -97,13 +109,21 @@
       <p class="mt-4 text-neutral-500 text-xs font-light">До следующего сброса: {{ timeUntilReset }}</p>
     </div>
   </div>
+
+  <ImportModal
+    v-model="isImportModalOpen"
+    :error="importError"
+    :is-submitting="isImporting"
+    @confirm="handleImportConfirm" />
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
-import { Download, Flame, RotateCcw } from "lucide-vue-next";
+import { computed, ref, watch } from "vue";
+import { Download, Flame, RotateCcw, Upload } from "lucide-vue-next";
 
 import { getTimeUntilReset } from "@/utils/date";
+import ImportModal from "@/components/ImportModal.vue";
+import type { ImportResult } from "@/stores/appStore";
 import type { Achievement, HabitDefinition, HabitState, Streak, StreakMap } from "@/types/app";
 
 const props = defineProps<{
@@ -125,6 +145,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   exportData: [];
+  importData: [snapshot: unknown, respond: (result: ImportResult) => void];
 }>();
 
 const totalHabits = computed(() => Object.keys(props.habitDefinitions).length);
@@ -172,6 +193,80 @@ const topStreaks = computed(() => streakLeaders.value);
 const exportData = () => {
   emit("exportData");
 };
+
+const isImportModalOpen = ref(false);
+const importError = ref<string | null>(null);
+const isImporting = ref(false);
+const importToast = ref<{ title: string; subtitle: string; variant: "success" | "error" } | null>(null);
+let importToastTimer: number | undefined;
+
+const clearToastTimer = () => {
+  if (importToastTimer) {
+    window.clearTimeout(importToastTimer);
+    importToastTimer = undefined;
+  }
+};
+
+const showImportToast = (title: string, subtitle: string, variant: "success" | "error") => {
+  importToast.value = { title, subtitle, variant };
+  clearToastTimer();
+  importToastTimer = window.setTimeout(() => {
+    importToast.value = null;
+    importToastTimer = undefined;
+  }, 2200);
+};
+
+const handleImportClick = () => {
+  isImportModalOpen.value = true;
+  importError.value = null;
+};
+
+watch(isImportModalOpen, isOpen => {
+  if (!isOpen) {
+    importError.value = null;
+  }
+});
+
+const handleImportConfirm = (rawPayload: string) => {
+  importError.value = null;
+  if (!rawPayload.trim()) {
+    importError.value = "Добавьте JSON вручную или загрузите файл.";
+    showImportToast("Импорт не выполнен", importError.value, "error");
+    return;
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(rawPayload);
+  } catch (error) {
+    importError.value = "Не удалось прочитать JSON. Проверьте формат.";
+    showImportToast("Импорт не выполнен", importError.value, "error");
+    return;
+  }
+
+  isImporting.value = true;
+  emit("importData", parsed, (result: ImportResult) => {
+    isImporting.value = false;
+    if (!result.success) {
+      importError.value = result.message ?? "Проверьте структуру файла.";
+      showImportToast("Импорт не выполнен", importError.value, "error");
+      return;
+    }
+
+    isImportModalOpen.value = false;
+    showImportToast("Импорт выполнен", "Данные восстановлены из резервной копии.", "success");
+  });
+};
 </script>
 
-<style scoped></style>
+<style scoped>
+.toast-enter-active,
+.toast-leave-active {
+  transition: all 0.25s ease;
+}
+.toast-enter-from,
+.toast-leave-to {
+  opacity: 0;
+  transform: translateY(-8px) scale(0.98);
+}
+</style>

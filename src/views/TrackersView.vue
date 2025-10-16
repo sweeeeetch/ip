@@ -5,7 +5,8 @@
     :financial-bonuses="financialBonuses"
     @update-mood="updateMood"
     @add-gratitude="addGratitude"
-    @add-financial-bonus="addFinancialBonus" />
+    @add-financial-bonus="addFinancialBonus"
+    @delete-gratitude="deleteGratitude" />
 </template>
 
 <script setup lang="ts">
@@ -29,5 +30,9 @@ const addGratitude = (entry: GratitudeEntry) => {
 
 const addFinancialBonus = (bonusId: number) => {
   store.addFinancialBonus(bonusId);
+};
+
+const deleteGratitude = (entryId: number) => {
+  store.deleteGratitude(entryId);
 };
 </script>

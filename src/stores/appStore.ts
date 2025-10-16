@@ -14,11 +14,17 @@ import type {
   HabitState,
   HabitTime,
   Reward,
+  RewardPayload,
   Streak,
   StreakMap,
   Task,
   TaskType,
 } from "@/types/app";
+
+export type ImportResult = {
+  success: boolean;
+  message?: string;
+};
 
 const STORAGE_KEYS = {
   week: "ip-week",
@@ -56,6 +62,11 @@ type HabitUpsertPayload = {
   time: HabitDefinition["time"];
   color: string;
 };
+
+const isPlainRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+const isFiniteNumber = (value: unknown): value is number => typeof value === "number" && Number.isFinite(value);
 
 const normalizeHabitDefinitions = (definitions: Record<string, any>): Record<string, HabitDefinition> => {
   const entries = Object.entries(definitions ?? {});
@@ -368,6 +379,10 @@ export const useAppStore = defineStore("app", () => {
     gratitude.value = [...gratitude.value, entry];
   };
 
+  const deleteGratitude = (entryId: number) => {
+    gratitude.value = gratitude.value.filter(entry => entry.id !== entryId);
+  };
+
   const addFinancialBonus = (bonusId: number) => {
     const bonus = financialBonuses.find(item => item.id === bonusId);
     if (!bonus) return;
@@ -389,6 +404,39 @@ export const useAppStore = defineStore("app", () => {
     const updated = [...rewards.value];
     updated[index] = { ...reward, claimed: true, claimedAt: Date.now() };
     rewards.value = updated;
+  };
+
+  const addReward = (payload: RewardPayload) => {
+    const newReward: Reward = {
+      id: Date.now(),
+      name: payload.name,
+      cost: Math.max(1, Number(payload.cost) || 1),
+      resetDays: Math.max(1, Number(payload.resetDays) || 1),
+      claimed: false,
+      claimedAt: null,
+    };
+
+    rewards.value = [...rewards.value, newReward];
+  };
+
+  const updateReward = (rewardId: number, payload: RewardPayload) => {
+    const normalizedCost = Math.max(1, Number(payload.cost) || 1);
+    const normalizedResetDays = Math.max(1, Number(payload.resetDays) || 1);
+
+    rewards.value = rewards.value.map(reward =>
+      reward.id === rewardId
+        ? {
+            ...reward,
+            name: payload.name,
+            cost: normalizedCost,
+            resetDays: normalizedResetDays,
+          }
+        : reward
+    );
+  };
+
+  const deleteReward = (rewardId: number) => {
+    rewards.value = rewards.value.filter(reward => reward.id !== rewardId);
   };
 
   const upsertHabitDefinition = (id: string | null, payload: HabitUpsertPayload) => {
@@ -500,6 +548,182 @@ export const useAppStore = defineStore("app", () => {
     return payload;
   };
 
+  type ExportSnapshot = ReturnType<typeof createExportSnapshot>;
+
+  const restoreFromSnapshot = (rawSnapshot: unknown): ImportResult => {
+    if (!isPlainRecord(rawSnapshot)) {
+      return { success: false, message: "Файл не похож на резервную копию." };
+    }
+
+    const snapshot = rawSnapshot as Record<string, unknown>;
+    const rawWeek = snapshot.week;
+    const rawPoints = snapshot.points;
+    const rawLevel = snapshot.level;
+    const rawTotalPoints = snapshot.totalPoints;
+    const rawHabitDefinitions = snapshot.habitDefinitions;
+
+    if (
+      !isFiniteNumber(rawWeek) ||
+      !isFiniteNumber(rawPoints) ||
+      !isFiniteNumber(rawLevel) ||
+      !isFiniteNumber(rawTotalPoints) ||
+      !isPlainRecord(rawHabitDefinitions)
+    ) {
+      return { success: false, message: "Обязательные поля отсутствуют или повреждены." };
+    }
+
+    const safeHabitDefinitions = normalizeHabitDefinitions(rawHabitDefinitions as Record<string, any>);
+
+    const sanitizeHabitState = (value: unknown, definitions: Record<string, HabitDefinition>): HabitState => {
+      const base: HabitState = {};
+      Object.keys(definitions).forEach(key => {
+        base[key] = false;
+      });
+
+      if (!isPlainRecord(value)) return base;
+      Object.entries(value).forEach(([key, val]) => {
+        if (!definitions[key]) return;
+        base[key] = Boolean(val);
+      });
+
+      return base;
+    };
+
+    const sanitizeStreakMap = (value: unknown, definitions: Record<string, HabitDefinition>): StreakMap => {
+      if (!isPlainRecord(value)) return {};
+
+      return Object.entries(value).reduce<StreakMap>((acc, [key, streakRaw]) => {
+        if (!definitions[key]) return acc;
+        if (!isPlainRecord(streakRaw)) return acc;
+
+        const count = Number(streakRaw.count);
+        const lastDate = typeof streakRaw.lastDate === "string" ? streakRaw.lastDate : null;
+        acc[key] = {
+          count: Number.isFinite(count) && count > 0 ? Math.floor(count) : 0,
+          lastDate,
+        };
+        return acc;
+      }, {});
+    };
+
+    const sanitizeTaskCollection = (value: unknown, fallbackType: TaskType): Task[] => {
+      if (!Array.isArray(value)) return [];
+
+      return value
+        .map(item => {
+          if (!isPlainRecord(item)) return null;
+
+          const idNumeric = Number(item.id);
+          const fallbackId = Date.now() + Math.floor(Math.random() * 1000);
+          const id = Number.isFinite(idNumeric) ? idNumeric : fallbackId;
+          const textRaw = typeof item.text === "string" ? item.text.trim() : "";
+          const text = textRaw.length > 0 ? textRaw : "Задача";
+          const priorityNumeric = Number(item.priority);
+          const priority = Number.isFinite(priorityNumeric) ? Math.max(0, Math.floor(priorityNumeric)) : 0;
+          const completed = Boolean(item.completed);
+          const createdAt = typeof item.createdAt === "string" ? item.createdAt : new Date().toISOString();
+          const rawType = item.type;
+          const type =
+            rawType === "daily" || rawType === "weekly" || rawType === "monthly" ? (rawType as TaskType) : fallbackType;
+
+          return {
+            id,
+            text,
+            priority,
+            completed,
+            createdAt,
+            type,
+          } satisfies Task;
+        })
+        .filter((task): task is Task => Boolean(task));
+    };
+
+    const sanitizeGratitude = (value: unknown): GratitudeEntry[] => {
+      if (!Array.isArray(value)) return [];
+
+      return value
+        .map(item => {
+          if (!isPlainRecord(item)) return null;
+          const textRaw = typeof item.text === "string" ? item.text.trim() : "";
+          if (!textRaw) return null;
+
+          const idNumeric = Number(item.id);
+          const fallbackId = Date.now() + Math.floor(Math.random() * 1000);
+          const id = Number.isFinite(idNumeric) ? idNumeric : fallbackId;
+          const date = typeof item.date === "string" ? item.date : new Date().toDateString();
+
+          return {
+            id,
+            text: textRaw,
+            date,
+          } satisfies GratitudeEntry;
+        })
+        .filter((entry): entry is GratitudeEntry => Boolean(entry));
+    };
+
+    const sanitizeAchievements = (value: unknown): Achievement[] => {
+      if (!Array.isArray(value)) return [];
+
+      return value
+        .map(item => {
+          if (!isPlainRecord(item)) return null;
+          const textRaw = typeof item.text === "string" ? item.text.trim() : "";
+          if (!textRaw) return null;
+
+          const idNumeric = Number(item.id);
+          const fallbackId = Date.now() + Math.floor(Math.random() * 1000);
+          const id = Number.isFinite(idNumeric) ? idNumeric : fallbackId;
+          const time = typeof item.time === "string" ? item.time : new Date().toLocaleTimeString();
+
+          return {
+            id,
+            text: textRaw,
+            time,
+          } satisfies Achievement;
+        })
+        .filter((entry): entry is Achievement => Boolean(entry));
+    };
+
+    const sanitizedHabits = sanitizeHabitState(snapshot.habits, safeHabitDefinitions);
+    const sanitizedStreaks = sanitizeStreakMap(snapshot.streaks, safeHabitDefinitions);
+    const sanitizedDailyTasks = sanitizeTaskCollection(snapshot.dailyTasks, "daily");
+    const sanitizedWeeklyTasks = sanitizeTaskCollection(snapshot.weeklyGoals, "weekly");
+    const sanitizedMonthlyTasks = sanitizeTaskCollection(snapshot.monthlyProjects, "monthly");
+    const sanitizedGratitude = sanitizeGratitude(snapshot.gratitude);
+    const sanitizedAchievements = sanitizeAchievements(snapshot.achievements);
+
+    const resolvedWeek = Math.max(1, Math.floor(rawWeek));
+    const resolvedPoints = Math.max(0, Math.floor(rawPoints));
+    const resolvedLevel = Math.max(1, Math.floor(rawLevel));
+    const resolvedTotalPoints = Math.max(resolvedPoints, Math.floor(rawTotalPoints));
+    const resolvedMood = (() => {
+      const moodRaw = snapshot.mood;
+      if (!isFiniteNumber(moodRaw)) return mood.value;
+      const moodNumeric = Math.floor(moodRaw);
+      return Math.min(10, Math.max(1, moodNumeric));
+    })();
+
+    week.value = resolvedWeek;
+    points.value = resolvedPoints;
+    level.value = resolvedLevel;
+    totalPoints.value = resolvedTotalPoints;
+    habitDefinitions.value = safeHabitDefinitions;
+    habits.value = sanitizedHabits;
+    streaks.value = sanitizedStreaks;
+    dailyTasks.value = sanitizedDailyTasks;
+    weeklyGoals.value = sanitizedWeeklyTasks;
+    monthlyProjects.value = sanitizedMonthlyTasks;
+    mood.value = resolvedMood;
+    gratitude.value = sanitizedGratitude;
+    achievements.value = sanitizedAchievements;
+
+    syncHabitState();
+    timeUntilReset.value = getTimeUntilResetText();
+
+    addAchievement("📥 Данные восстановлены из резервной копии.");
+    return { success: true };
+  };
+
   const getDayTotalPoints = (dateKey: string) => (completedHistory.value[dateKey] ?? []).reduce((sum, item) => sum + item.points, 0);
 
   const updateWeekPlan = (nextPlan: Record<string, string>) => {
@@ -573,10 +797,15 @@ export const useAppStore = defineStore("app", () => {
     toggleTask,
     updateMood,
     addGratitude,
+    deleteGratitude,
     addFinancialBonus,
     claimReward,
+    addReward,
+    updateReward,
+    deleteReward,
     checkForDailyReset,
     createExportSnapshot,
+    restoreFromSnapshot,
     getDayTotalPoints,
     updateWeekPlan,
     getTimeUntilResetText,
